@@ -315,4 +315,7 @@ import 'vs/workbench/contrib/workspace/browser/workspace.contribution';
 // Workspaces
 import 'vs/workbench/contrib/workspaces/browser/workspaces.contribution';
 
+// Test input editor
+import 'vs/workbench/contrib/textAreaEditor/browser/textAreaEditor.contribution';
+
 //#endregion
