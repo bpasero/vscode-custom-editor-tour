@@ -1,0 +1,127 @@
+{
+  "$schema": "https://aka.ms/codetour-schema",
+  "title": "File Working Copy Management",
+  "steps": [
+    {
+      "file": "src/vs/workbench/contrib/textAreaEditor/browser/textAreaEditor.contribution.ts",
+      "description": "Welcome to this tour that will explain the concepts of how to add a new editor to VSCode leveraging internal APIs. If you are interested to learn how to add a custom editor as an extension, please rather look at https://code.visualstudio.com/api/extension-guides/custom-editors\n\nIn this tour, we will be adding a `TextAreaEditor` to the workbench. As the name suggests, it is a editor capable of displaying text and allowing to edit text through a simple `<textarea>` element. ",
+      "line": 1
+    },
+    {
+      "file": "src/vs/workbench/contrib/textAreaEditor/browser/textAreaEditor.contribution.ts",
+      "description": "The call to `registerEditor` makes the editor known to the workbench and associates it with a `TextAreaEditorInput`. An editor can for example be opened via the `IEditorService#openEditor` method passing in the instance of `TextAreaEditorInput` to show. Based on the registered associated editors for the input, the editor will be picked.",
+      "line": 30,
+      "selection": {
+        "start": {
+          "line": 37,
+          "character": 22
+        },
+        "end": {
+          "line": 37,
+          "character": 41
+        }
+      }
+    },
+    {
+      "file": "src/vs/workbench/contrib/textAreaEditor/browser/textAreaEditor.contribution.ts",
+      "description": "Do not forget to register a `IEditorInputSerializer` for your editor and inputs. This is required to preserve and restore editors between restarts of VSCode. The role of the `IEditorInputSerializer` is to convert the `EditorInput` into a string (= serialized form) and then after a restart to be able to instantiate it again to the same form.",
+      "line": 58
+    },
+    {
+      "file": "src/vs/workbench/contrib/textAreaEditor/browser/textAreaEditor.contribution.ts",
+      "description": "One way of opening the text area editor was already mentioned in a previous step: by passing the `TextAreaEditorInput` into the `IEditorService#openEditor` method. But we actually want our editor to be configurable as standard editor for editing any files from the explorer. As such, we need to register to the `IEditorOverrideService`. The role of that service is to offer a way of opening files with our editor.",
+      "line": 62
+    },
+    {
+      "file": "src/vs/workbench/contrib/textAreaEditor/browser/textAreaEditor.contribution.ts",
+      "description": "By calling `registerContributionPoint` we can offer our editor as an editor for all files (given the `*` glob pattern). A user can pick our editor via the \"Open  with...\" command on a file in the explorer and can also permanently associate the editor for the file type.",
+      "line": 68
+    },
+    {
+      "file": "src/vs/workbench/contrib/textAreaEditor/browser/textAreaEditor.ts",
+      "description": "Let's take a quick look at the `TextAreaEditor`: it extends `EditorPane` and the easiest way of describing editor panes is to see them as initially empty \"canvas\" where editor inputs are set (via `setInput` below) which then should result in the \"canvas\" to be populated with contents. Different editor inputs are likely resulting in different editor contents to be visible.",
+      "line": 22
+    },
+    {
+      "file": "src/vs/workbench/contrib/textAreaEditor/browser/textAreaEditor.ts",
+      "description": "We are being asked to show a specific instance of `TextAreaEditorInput` in our editor. Here we pass the \"resolved\" text area editor input to our control. We will learn later how the `resolve` method is actually implemented.",
+      "line": 44
+    },
+    {
+      "file": "src/vs/workbench/contrib/textAreaEditor/browser/textAreaEditor.ts",
+      "description": "The `TextAreaControl` is the owner of the `<textarea>` element and will \"bind\" our text model to the UI control. Whenever the model changes, the text area should update and whenever the user types, the model should receive these changes. We will take a closer look at the \"model\" later when we touch on \"working copies\".",
+      "line": 69
+    },
+    {
+      "file": "src/vs/workbench/contrib/textAreaEditor/browser/textAreaEditor.ts",
+      "description": "The `create` method is called once per editor group that the editor displays in and allows to literally add all the elements to the parent `HTMLElement` that the editor is being made of.",
+      "line": 112
+    },
+    {
+      "file": "src/vs/workbench/contrib/textAreaEditor/browser/textAreaEditorInput.ts",
+      "description": "Next up is a closer look into the `TextAreaEditorInput`. The idea of editor inputs is to provide different inputs to the same editor. In this case, the text area editor input is identified by a resource (`URI`) on the file system. For example, when the user clicks on a file `Readme.md`, a `TextAreaEditorInput` is being created with the file as resource property. ",
+      "line": 21
+    },
+    {
+      "file": "src/vs/workbench/contrib/textAreaEditor/browser/textAreaEditorInput.ts",
+      "description": "The `resolve` method is long running and will only be called when the text area editor input is about to be displayed in the text area editor. The role of this method is to fetch the underlying contents of the file to display and return that.\n\nEvery editor is free to come up with their own way of resolving an editor input but to make it easy to implement editors that show inputs that have a representation on disk, file working copies have been introduced. Working copies are the minimal interface everyone has to implement to introduce something into the workbench that can be edited, saved and reverted. As such, it makes sense that editor inputs `resolve` to a working copy. The file working copy is an implementation of working copies based on the assumption that the contents can be saved and retrieved from the file system and they provide lots of functionality already out of the box.\n\nBy providing built in helpers for file working copies, the implementation becomes a lot simpler compared to implementing the entire working copy interface yourself.",
+      "line": 97
+    },
+    {
+      "file": "src/vs/workbench/contrib/textAreaEditor/browser/textAreaEditorInput.ts",
+      "description": "A good editor allows to both open existing files (\"stored files\") but also allows to create new files that do not exist yet (\"untitled\" files). In below code we delegate to one of the `IFileWorkingCopyManager#resolve` methods to resolve a file working copy depending on the editor opening an existing file or a new untitled file. \n\nWe will be looking into the `textAreaEditorService` in a later step.",
+      "line": 100
+    },
+    {
+      "file": "src/vs/workbench/contrib/textAreaEditor/browser/textAreaEditorWorkingCopy.ts",
+      "description": "File working copies are implemented by the workbench so that as a provider you do not have to implement all working copy methods such as `save`, `revert` or `backup`. However, file working copies still need a bit of information about the underlying model. As such, you will have to provide an implementation of `IFileWorkingCopyModel` that the file working copy model works with.\n\nOur implementation of the `model` for the file working copies is quite simple and a lot of code is shard between stored and untitled file woring copy models. Our model's representation is just a `value: string` property reflecting the current data as shown in the editor.",
+      "line": 38
+    },
+    {
+      "file": "src/vs/workbench/contrib/textAreaEditor/browser/textAreaEditorWorkingCopy.ts",
+      "description": "Whenever that data changes, we emit `onDidChangeContent` events. This event will for example turn the editor to indicate dirty state if the contents are different from the ones on the file system.",
+      "line": 40
+    },
+    {
+      "file": "src/vs/workbench/contrib/textAreaEditor/browser/textAreaEditorWorkingCopy.ts",
+      "description": "The `snapshot` method will be called whenever the file working copy is about to backup or save the contents to the file system. It needs to return the current state of contents as edited by the user. ",
+      "line": 61
+    },
+    {
+      "file": "src/vs/workbench/contrib/textAreaEditor/browser/textAreaEditorWorkingCopy.ts",
+      "description": "The `update` method will be called whenever the file working copy is either being created for the first time with the contents or when the contents have changed on disk (e.g. by another program).",
+      "line": 65
+    },
+    {
+      "file": "src/vs/workbench/contrib/textAreaEditor/browser/textAreaEditorService.ts",
+      "description": "How do we actually instantiate new text area file working copies? Here we add a simple service `ITextAreaEditorService` that only provides one property to get access at the `IFileWorkingCopyManager`. This manager provides the methods such as `resolve` to get at stored or untitled file working copies. ",
+      "line": 37,
+      "selection": {
+        "start": {
+          "line": 37,
+          "character": 14
+        },
+        "end": {
+          "line": 37,
+          "character": 35
+        }
+      }
+    },
+    {
+      "file": "src/vs/workbench/contrib/textAreaEditor/browser/textAreaEditorService.ts",
+      "description": "The `IFileWorkingCopyManager` itself only needs to know the `typeId` of working copies we introduce (this should be unique across working copies from other providers) and factories for stored and untitled working copy models.",
+      "line": 66
+    },
+    {
+      "file": "src/vs/workbench/contrib/textAreaEditor/browser/textAreaEditor.contribution.ts",
+      "description": "You can see the `ITextAreaEditorService` in use also from some of the actions we register with the workbench. Specifically for untitled files, we currently have to provide dedicated actions because there is no central place where new untitled editors can be opened. In these actions here we offer such a capability to open new untitled editors for the text area editor.",
+      "line": 117
+    },
+    {
+      "file": "src/vs/workbench/contrib/textAreaEditor/browser/textAreaEditor.contribution.ts",
+      "description": "One aspect of working copies are backups: whenever a working copy is edited, we will automatically store backups on disk to prevent data loss and to allow to exit without being forced to save (\"hot exit\"). Below `IWorkingCopyEditorService#registerHandler` call is needed to enable restoring of backed up working copies after a restart to their respective editors. We provide a handler that can create text area editor inputs for the provided working copies that belong to us.",
+      "line": 87
+    }
+  ],
+  "ref": "ben/custom-editor-example"
+}

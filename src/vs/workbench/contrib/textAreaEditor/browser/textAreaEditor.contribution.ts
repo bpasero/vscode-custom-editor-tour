@@ -59,7 +59,7 @@ Registry.as<IEditorInputFactoryRegistry>(EditorExtensions.EditorInputFactories).
 
 // --- TextArea Editor Override
 
-export class TextAreaEditorOverride implements IWorkbenchContribution {
+class TextAreaEditorOverride implements IWorkbenchContribution {
 
 	constructor(
 		@IInstantiationService instantiationService: IInstantiationService,
